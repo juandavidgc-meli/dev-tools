@@ -1,0 +1,59 @@
+pipeline {
+
+    environment {
+        PROJECT_NAME = "1p-sap-retriever"
+        USER_HOME = "/Users/jugutierrez/"
+    }
+
+    agent {
+        docker {
+            image 'gradle-agent'
+            args "--network=dev-tools_jenkinsnet -v /Users/jugutierrez/.gradle:/home/jenkins/.gradle"
+        }
+    }
+    stages {
+        stage('Copy'){
+            steps{
+                sh """
+                    cp -r /home/code/${PROJECT_NAME}/* .
+                """
+            }
+        }
+        stage('Test'){
+            steps{
+                sh """
+                    gradle test jacocoTestReport --no-daemon
+                """
+                junit '**/build/test-results/test/*.xml'
+            }
+        }
+        stage('CheckStyle'){
+            steps{
+                sh """
+                    gradle checkstyleMain
+                """
+            }
+        }
+        stage('SonarQube analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh "gradle sonarqube"
+                }
+            }
+        }
+        stage("Quality gate") {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+        stage("Documentation") {
+            steps {
+                sh """
+                    export SCOPE=local && gradle generateOpenApiDocs
+                    mkdir -p /home/code/${PROJECT_NAME}/docs/specs/
+                    cp docs/specs/swagger.yaml /home/code/${PROJECT_NAME}/docs/specs/
+                """
+            }
+        }
+    }
+}

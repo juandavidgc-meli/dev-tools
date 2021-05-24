@@ -10,7 +10,7 @@ services:
       - '${JENKINS_HTTPS_PORT}:8443'
     volumes:
       - 'jenkins_data:/var/jenkins_home'
-      - '/Users/jugutierrez/Code/:/home/code'
+      - '${CODE_FOLDER}:/home/code'
       - '/var/run/docker.sock:/var/run/docker.sock'
     environment:
       - 'JENKINS_OPTS=--httpPort=8080 --httpsPort=8443'
