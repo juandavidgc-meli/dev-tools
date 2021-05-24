@@ -1,14 +1,13 @@
 pipeline {
 
     environment {
-        PROJECT_NAME = "1p-sap-retriever"
-        USER_HOME = "/Users/jugutierrez/"
+        PROJECT_NAME = ""
     }
 
     agent {
         docker {
             image 'gradle-agent'
-            args "--network=dev-tools_jenkinsnet -v /Users/jugutierrez/.gradle:/home/jenkins/.gradle"
+            args "--network=dev-tools_jenkinsnet"
         }
     }
     stages {
